@@ -25,7 +25,7 @@ public class ExcelFileServiceImpl implements ExcelFileService {
 
   @Override
   public ByteArrayInputStream export(List<Contact> contacts) {
-    try(Workbook workbook = new XSSFWorkbook()){
+    try (Workbook workbook = new XSSFWorkbook()) {
       Sheet sheet = workbook.createSheet("Contacts");
 
       Row row = sheet.createRow(0);
@@ -49,7 +49,7 @@ public class ExcelFileServiceImpl implements ExcelFileService {
       cell.setCellStyle(headerCellStyle);
 
       // Creating data rows for each contact
-      for(int i = 0; i < contacts.size(); i++) {
+      for (int i = 0; i < contacts.size(); i++) {
         Row dataRow = sheet.createRow(i + 1);
         dataRow.createCell(0).setCellValue(contacts.get(i).getId());
         dataRow.createCell(1).setCellValue(contacts.get(i).getName());
@@ -61,6 +61,54 @@ public class ExcelFileServiceImpl implements ExcelFileService {
       sheet.autoSizeColumn(1);
       sheet.autoSizeColumn(2);
 
+      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+      workbook.write(outputStream);
+      return new ByteArrayInputStream(outputStream.toByteArray());
+    } catch (IOException ex) {
+      logger.error("Error during export Excel file", ex);
+      return null;
+    }
+  }
+
+  @Override
+  public ByteArrayInputStream exportMultiSheet(List<Contact> contacts) {
+    try (Workbook workbook = new XSSFWorkbook()) {
+      for (int ii = 1; ii < 4; ii++) {
+        Sheet sheet = workbook.createSheet("Contacts_"+ii);
+
+        Row row = sheet.createRow(0);
+
+        // Define header cell style
+        CellStyle headerCellStyle = workbook.createCellStyle();
+        headerCellStyle.setFillForegroundColor(IndexedColors.LIGHT_GREEN.getIndex());
+        headerCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+        // Creating header cells
+        Cell cell = row.createCell(0);
+        cell.setCellValue("Id");
+        cell.setCellStyle(headerCellStyle);
+
+        cell = row.createCell(1);
+        cell.setCellValue("Name");
+        cell.setCellStyle(headerCellStyle);
+
+        cell = row.createCell(2);
+        cell.setCellValue("Age");
+        cell.setCellStyle(headerCellStyle);
+
+        // Creating data rows for each contact
+        for (int i = 0; i < contacts.size(); i++) {
+          Row dataRow = sheet.createRow(i + 1);
+          dataRow.createCell(0).setCellValue(contacts.get(i).getId()+ii);
+          dataRow.createCell(1).setCellValue(contacts.get(i).getName()+ii);
+          dataRow.createCell(2).setCellValue(contacts.get(i).getAge()+ii);
+        }
+
+        // Making size of column auto resize to fit with data
+        sheet.autoSizeColumn(0);
+        sheet.autoSizeColumn(1);
+        sheet.autoSizeColumn(2);
+      }
       ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
       workbook.write(outputStream);
       return new ByteArrayInputStream(outputStream.toByteArray());

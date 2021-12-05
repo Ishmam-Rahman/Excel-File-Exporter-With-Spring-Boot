@@ -25,13 +25,24 @@ public class DownloadExcelController {
     return "index";
   }
 
-  @GetMapping("/downloadExcelFile")
+  @GetMapping("/download-exce-file")
   public void downloadExcelFile(HttpServletResponse response) throws IOException {
     List<Contact> contacts = new Vector<>();
     contacts.add(new Contact(1L, "a", 12));
     contacts.add(new Contact(2L, "b", 12));
     contacts.add(new Contact(3L, "c", 12));
     ByteArrayInputStream byteArrayInputStream = excelFileService.export(contacts);
+    response.setContentType("application/octet-stream");
+    response.setHeader("Content-Disposition", "attachment; filename=contacts.xlsx");
+    IOUtils.copy(byteArrayInputStream, response.getOutputStream());
+  }
+  @GetMapping("/download-excel-file-multiple-sheet")
+  public void downloadExcelFileMultipleSheet(HttpServletResponse response) throws IOException {
+    List<Contact> contacts = new Vector<>();
+    contacts.add(new Contact(1L, "a", 12));
+    contacts.add(new Contact(2L, "b", 12));
+    contacts.add(new Contact(3L, "c", 12));
+    ByteArrayInputStream byteArrayInputStream = excelFileService.exportMultiSheet(contacts);
     response.setContentType("application/octet-stream");
     response.setHeader("Content-Disposition", "attachment; filename=contacts.xlsx");
     IOUtils.copy(byteArrayInputStream, response.getOutputStream());
